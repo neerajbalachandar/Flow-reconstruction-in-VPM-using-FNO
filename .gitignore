@@ -18,3 +18,4 @@ torch_extensions/
 
 # Data Path
 data/raw data
+data/train
