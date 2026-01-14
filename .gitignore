@@ -15,3 +15,6 @@ torch_extensions/
 
 # OS files
 .DS_Store
+
+# Data Path
+data/raw data
