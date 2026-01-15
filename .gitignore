@@ -17,5 +17,4 @@ torch_extensions/
 .DS_Store
 
 # Data Path
-data/raw data
-data/train
+data/
