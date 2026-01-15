@@ -1,1 +1,1 @@
-# Flow-reconstruction-in-VPM-using-FNO
+# Flow reconstruction in VPM using FNO
