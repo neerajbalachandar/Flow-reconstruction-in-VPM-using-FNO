@@ -9,3 +9,6 @@ from neuralop.training import AdamW
 from neuralop.data.datasets import load_darcy_flow_small
 from neuralop.utils import count_model_params
 
+
+
+

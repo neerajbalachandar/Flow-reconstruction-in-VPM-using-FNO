@@ -67,7 +67,7 @@ train_dataset = VPMGridDataset(train_files)
 
 train_loader = DataLoader(
     train_dataset,
-    batch_size=1,
+    batch_size=10,
     shuffle=True
 )
 
@@ -85,7 +85,7 @@ x_pe = pos_embedding(x)
 print("With positional embedding:", x_pe.shape)
 
 
-sample_id = 0
+sample_id = 1
 
 plt.figure(figsize=(10, 4))
 
@@ -109,4 +109,3 @@ plt.title("x-coordinate embedding")
 
 plt.tight_layout()
 plt.show()
-
