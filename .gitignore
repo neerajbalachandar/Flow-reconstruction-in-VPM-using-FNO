@@ -1,7 +1,5 @@
 # Virtual environments
-venv/
 neuralop-env/
-.env/
 
 # Python cache
 __pycache__/

@@ -2,39 +2,48 @@ import numpy as np
 from pathlib import Path
 from tqdm import tqdm
 
-# ============================================================
-# CONFIG
-# ============================================================
+# Path
 
 data_dir = Path("data/train/pair_1")          # input particle data
-out_dir  = Path("data/train/pair_1_grid")     # output grid data
+out_dir  = Path("data/train/pair_1_grid_2D")     # output grid data
 out_dir.mkdir(parents=True, exist_ok=True)
 
-# Domain (adjust if needed)
-xmin, xmax = -0.8, 0.4
-ymin, ymax = -0.8, 0.2
+xmin, ymin = np.inf, np.inf
+xmax, ymax = -np.inf, -np.inf
+
+for f in data_dir.glob("frame_*.npz"):
+    data = np.load(f)
+    pos = data["pos"]  # (Np, 2)
+
+    xmin = min(xmin, pos[:, 0].min())
+    xmax = max(xmax, pos[:, 0].max())
+
+    ymin = min(ymin, pos[:, 1].min())
+    ymax = max(ymax, pos[:, 1].max())
+
+print("Global particle bounds:")
+print(f"x: [{xmin:.5f}, {xmax:.5f}]")
+print(f"y: [{ymin:.5f}, {ymax:.5f}]")
+
+# Domain
+xmin, xmax = 0.8, 1.8
+ymin, ymax = -2.1, 0.1
 
 Nx, Ny = 32, 32   # grid resolution
 
-# ============================================================
-# GRID SETUP
-# ============================================================
+# Grid 
 
 x_grid = np.linspace(xmin, xmax, Nx)
 y_grid = np.linspace(ymin, ymax, Ny)
 X, Y = np.meshgrid(x_grid, y_grid, indexing="ij")
 
-# ============================================================
-# KERNEL
-# ============================================================
+# Kernel
 
 def gaussian_kernel(dx, dy, h):
     return np.exp(-(dx**2 + dy**2) / (2.0 * h**2))
 
 
-# ============================================================
-# PARTICLE → GRID (INPUT)
-# ============================================================
+# Particle to Grid
 
 def particles_to_grid(pos, omega, sigma, vol, X, Y):
     """
@@ -61,9 +70,7 @@ def particles_to_grid(pos, omega, sigma, vol, X, Y):
     return grid
 
 
-# ============================================================
-# VELOCITY → GRID (OUTPUT)
-# ============================================================
+# Velocity to grid
 
 def velocity_to_grid(nodes, U_nodes, X, Y):
     """
@@ -88,9 +95,7 @@ def velocity_to_grid(nodes, U_nodes, X, Y):
     return u_grid
 
 
-# ============================================================
-# MAIN LOOP
-# ============================================================
+# main
 
 files = sorted(data_dir.glob("frame_*.npz"))
 
