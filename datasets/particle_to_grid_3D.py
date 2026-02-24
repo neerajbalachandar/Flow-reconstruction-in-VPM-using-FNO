@@ -121,7 +121,7 @@ for f in tqdm(files):
 
     # ---------------- INPUT ----------------
     pos   = data["pos"][:, :3]
-    omega = data["gamma_scalar"]
+    omega = data["gamma_mag"]
     sigma = data["sigma"]
     vol   = data["vol"]
 

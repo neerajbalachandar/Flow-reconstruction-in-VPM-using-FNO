@@ -1,1 +1,49 @@
 # Flow reconstruction in VPM using FNO
+
+# File description
+
+datasets/autodomain_particle_grid_2D.py - helps in defining domains extending over the entire simulation, without manually entering.
+datasets/particle_to_grid_2D.py - converts per frame particle data to 2D Eulerian grids
+
+datasets/extract_pair.py - main script for converting h5,xmf to npz
+
+datasets/dataset_gen_2D.py - dataset loader, applies grid embeddings and plot sample input/output
+3D version slices 3D data to 2D for positional embedding
+
+datasets/pt_reader.py-  inspect torch data files keys/shapes
+
+data/raw_data - poisson for now, 1,2,... for initial conditions within the simulation for the same geometry
+1. airfoil - 1 - 1000 timestep, 400 fdom with 10 step
+2. simple wing - 1 - 200 timestep, 150 fdom with 10 step
+
+Data sim files might need corrections for IC (data variability) and sim params (correctness)
+Refer readme.md in each data folder for simulation info
+
+data/train - pair_1 corresponds to 1st set of data generation and pair_1_grid for the output of the datasets/particle_to_grid file
+
+rvpm_codes/ - raw codes for simulation (input with resolution) and post-processing (output with a different or same resolution)
+
+
+
+# NOTE:
+1. pfield and fdom - neuralop
+vtk - forces - aeroelastic solver
+
+2. Train-test split can be chronologically ordered if temporal extrapolation needs to be assesed, and it is not a problem if late-time physics is not very different.
+
+3. Completely ignoring 3D data. Find a way!
+
+4. The resolution inputed at Nx,Ny in particle_to_grid_2D is basically the input resolution of the data, while the output resolution of train data is the fdom resolution set during the simulation run. Prediction will be based on this and should still be able to predict at a higher resolution when trained on lower resolution data (fdom output data on lower resolution), get fdom output from model at higher resolution both spatially and temporal prediction.  
+
+5. The model needs input_grid and U_grid on the same fixed (Nx, Ny) grid. That's why particle to grid is run on both input and output (more guarantee to match)
+
+
+# Question:
+1. Are we gonna run simulations and validate for only static cases as in a aerofoil kept at an AOA or even for rotor, flapping cases? 
+2. Why do we do this grid embedding and positional embedding?
+Sol: Your raw VPM state is particles at irregular positions. FNO training expects tensors on a fixed regular grid (C, Nx, Ny). So this step deposits particle quantities (like gamma_mag, sigma, vol) onto grid cells and also grids target velocity.Hence, it converts unstructured particle data into a format neural operators can learn from efficiently and consistently.
+
+A regular grid index alone does not explicitly tell the model physical coordinates. Adding coordinate channels (x, y) gives absolute location information, which helps with boundary/location-dependent behavior. In your current repo, this is shown in dataset_gen_2D.py mostly for inspection/demo; the main training file neuraloperator_train.py does not currently add those channels explicitly.
+
+3. Explain in paper clearly why neuraloperators is the thing here - infinite dimensional, operator learning function spaces, super-resolution, not data hungry (zero-shot), etc...
+

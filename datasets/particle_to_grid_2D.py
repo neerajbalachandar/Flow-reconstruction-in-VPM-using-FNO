@@ -26,10 +26,10 @@ print(f"x: [{xmin:.5f}, {xmax:.5f}]")
 print(f"y: [{ymin:.5f}, {ymax:.5f}]")
 
 # Domain
-xmin, xmax = 0.8, 1.8
+xmin, xmax = 0.5, 2.0
 ymin, ymax = -2.1, 0.1
 
-Nx, Ny = 32, 32   # grid resolution
+Nx, Ny = 64, 64   # grid resolution
 
 # Grid 
 
@@ -106,7 +106,7 @@ for f in tqdm(files):
 
     # ---------------- INPUT ----------------
     pos   = data["pos"][:, :2]
-    omega = data["gamma_scalar"]
+    omega = data["gamma_mag"]
     sigma = data["sigma"]
     vol   = data["vol"]
 

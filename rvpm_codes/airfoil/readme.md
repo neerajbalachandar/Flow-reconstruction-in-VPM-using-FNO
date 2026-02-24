@@ -1,0 +1,1 @@
+Output Resolution (fdom) is 64x64x64
