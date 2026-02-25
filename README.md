@@ -1,4 +1,4 @@
-# Flow reconstruction in VPM using FNO
+# FNO-based Flow Reconstruction from Lagrangian Vortex Particle Field
 
 # File description
 
