@@ -37,6 +37,10 @@ vtk - forces - aeroelastic solver
 
 5. The model needs input_grid and U_grid on the same fixed (Nx, Ny) grid. That's why particle to grid is run on both input and output (more guarantee to match)
 
+6. Right now the input pair in train and test are both same resolution 64x64x64 for the FNO model due to projection using Gaussian kernels. Try out a lower input pair resolution for training alone, for the evaluation of zero shot super resolution by maintaining the same input pair resolution for test.
+
+7. 
+
 
 # Question:
 1. Are we gonna run simulations and validate for only static cases as in a aerofoil kept at an AOA or even for rotor, flapping cases? 
