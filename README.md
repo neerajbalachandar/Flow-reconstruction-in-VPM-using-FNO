@@ -39,7 +39,17 @@ vtk - forces - aeroelastic solver
 
 6. Right now the input pair in train and test are both same resolution 64x64x64 for the FNO model due to projection using Gaussian kernels. Try out a lower input pair resolution for training alone, for the evaluation of zero shot super resolution by maintaining the same input pair resolution for test.
 
-7. 
+7. Train/val/test distribution shift
+If the early frames have very different dynamics (startup transient), and the model mostly saw later frames (or random split picked few early ones), it will fail badly there.
+
+Normalization mismatch
+If normalization stats are computed on a subset that under‑represents early frames, those samples can be scaled poorly → huge errors.
+
+Model underfit + low capacity
+With a small model (low hidden_channels, few epochs), it often only learns “average” behavior — early transients are the hardest.
+
+Data mismatch in resolution
+If the test input is 64³ but output truth is 16³, or vice‑versa, you’re effectively comparing different grids — early frames amplify that mismatch.
 
 
 # Question:
