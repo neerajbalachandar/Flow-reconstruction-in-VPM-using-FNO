@@ -1,0 +1,20 @@
+# Virtual environments
+neuralop-env/
+fno-env/
+train/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# ML artifacts
+*.pth
+*.pt
+torch_extensions/
+
+# OS files
+.DS_Store
+
+# Data Path
+data/
