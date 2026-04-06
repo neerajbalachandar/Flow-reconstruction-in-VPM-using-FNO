@@ -51,6 +51,7 @@ With a small model (low hidden_channels, few epochs), it often only learns “av
 Data mismatch in resolution
 If the test input is 64³ but output truth is 16³, or vice‑versa, you’re effectively comparing different grids — early frames amplify that mismatch.
 
+8. I have a concern in terms of the normalization. Is the feature scaling performed for individual datasets or collectively among the entire dataset, as differences in the datasets completely (in terms of say geometry) might cause different range of values for certain parameters.
 
 # Question:
 1. Are we gonna run simulations and validate for only static cases as in a aerofoil kept at an AOA or even for rotor, flapping cases? 
