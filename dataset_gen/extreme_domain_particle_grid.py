@@ -32,21 +32,55 @@ def parse_args():
         "--data-dirs",
         nargs="+",
         type=Path,
-        required=True,
+        default=[
+            Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_1_gno"),
+            Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_2_gno"),
+            Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_3_gno"),
+            Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_4_gno"),
+            Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_5_gno"),
+            Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_6_sr_gno"),
+        ],
         help="List of dataset folders, each containing frame_*.npz files.",
+    )
+    parser.add_argument(
+        "--only-datasets",
+        nargs="*",
+        default=None,
+        help=(
+            "Optional list of dataset folder names to process (e.g., "
+            "pair_6_sr_gno). Global bounds are still computed across all --data-dirs."
+        ),
     )
     parser.add_argument(
         "--out-root",
         type=Path,
-        default=Path("./extreme_grid_outputs"),
+        default=Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/global_fno_32"),
         help=(
             "Root output directory. One subfolder per input dataset is created "
             "(subfolder name = input folder name)."
         ),
     )
-    parser.add_argument("--nx", type=int, default=64, help="Grid resolution in x.")
-    parser.add_argument("--ny", type=int, default=64, help="Grid resolution in y.")
-    parser.add_argument("--nz", type=int, default=64, help="Grid resolution in z.")
+    parser.add_argument("--nx", type=int, default=32, help="Grid resolution in x.")
+    parser.add_argument("--ny", type=int, default=32, help="Grid resolution in y.")
+    parser.add_argument("--nz", type=int, default=32, help="Grid resolution in z.")
+    parser.add_argument(
+        "--highres-datasets",
+        nargs="*",
+        default=["pair_6_sr_gno"],
+        help=(
+            "Dataset folder names to process at higher resolution while "
+            "keeping global bounds."
+        ),
+    )
+    parser.add_argument(
+        "--highres-out-root",
+        type=Path,
+        default=Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/global_fno_64"),
+        help="Output root for high-resolution datasets.",
+    )
+    parser.add_argument("--highres-nx", type=int, default=64, help="High-res grid resolution in x.")
+    parser.add_argument("--highres-ny", type=int, default=64, help="High-res grid resolution in y.")
+    parser.add_argument("--highres-nz", type=int, default=64, help="High-res grid resolution in z.")
     parser.add_argument(
         "--margin-frac",
         type=float,
@@ -78,6 +112,7 @@ def parse_args():
         help="Write output with np.savez_compressed (smaller files, slower CPU).",
     )
     return parser.parse_args()
+
 
 
 def compute_auto_domain_3d(files, margin_frac):
@@ -274,12 +309,38 @@ def main():
     out_root = args.out_root
     out_root.mkdir(parents=True, exist_ok=True)
 
+    highres_root = args.highres_out_root
+    highres_root.mkdir(parents=True, exist_ok=True)
+
     datasets = gather_dataset_frames(args.data_dirs, args.max_frames)
+    only = set(args.only_datasets) if args.only_datasets else None
+    if only:
+        available = {ds["data_dir"].name for ds in datasets}
+        missing = sorted(only - available)
+        if missing:
+            raise RuntimeError(f"Requested --only-datasets not found: {missing}")
+
+    highres = set(args.highres_datasets) if args.highres_datasets else set()
+    if highres:
+        available = {ds["data_dir"].name for ds in datasets}
+        missing_hi = sorted(highres - available)
+        if missing_hi:
+            raise RuntimeError(f"Requested --highres-datasets not found: {missing_hi}")
+
+    datasets_to_process = [
+        ds for ds in datasets
+        if (only is None or ds["data_dir"].name in only)
+    ]
     all_files = [fp for ds in datasets for fp in ds["files"]]
 
-    print(f"Output root: {out_root}")
+    print(f"Output root (low): {out_root}")
+    print(f"Output root (high): {highres_root}")
     print(f"Datasets   : {len(datasets)}")
-    for ds in datasets:
+    if only is not None:
+        print(f"Processing subset: {sorted(only)}")
+    if highres:
+        print(f"High-res datasets: {sorted(highres)}")
+    for ds in datasets_to_process:
         files = ds["files"]
         print(f"  - {ds['data_dir']} ({len(files)} frames)")
         if files:
@@ -295,22 +356,33 @@ def main():
     print(f"y: [{ymin:.6f}, {ymax:.6f}]")
     print(f"z: [{zmin:.6f}, {zmax:.6f}]")
 
-    x_grid = np.linspace(xmin, xmax, args.nx, dtype=np.float64)
-    y_grid = np.linspace(ymin, ymax, args.ny, dtype=np.float64)
-    z_grid = np.linspace(zmin, zmax, args.nz, dtype=np.float64)
-    X, Y, Z = np.meshgrid(x_grid, y_grid, z_grid, indexing="ij")
+    def make_grid(nx, ny, nz):
+        xg = np.linspace(xmin, xmax, nx, dtype=np.float64)
+        yg = np.linspace(ymin, ymax, ny, dtype=np.float64)
+        zg = np.linspace(zmin, zmax, nz, dtype=np.float64)
+        Xg, Yg, Zg = np.meshgrid(xg, yg, zg, indexing="ij")
+        return xg, yg, zg, Xg, Yg, Zg
+
+    low_grid = make_grid(args.nx, args.ny, args.nz)
+    high_grid = make_grid(args.highres_nx, args.highres_ny, args.highres_nz) if highres else None
 
     global_metadata = {
         "config": {
             "data_dirs": [str(p) for p in args.data_dirs],
-            "out_root": str(out_root),
-            "nx": int(args.nx),
-            "ny": int(args.ny),
-            "nz": int(args.nz),
+            "out_root_low": str(out_root),
+            "out_root_high": str(highres_root),
+            "nx_low": int(args.nx),
+            "ny_low": int(args.ny),
+            "nz_low": int(args.nz),
+            "nx_high": int(args.highres_nx),
+            "ny_high": int(args.highres_ny),
+            "nz_high": int(args.highres_nz),
+            "highres_datasets": list(highres),
             "margin_frac": float(args.margin_frac),
             "kernel_trunc_sigma": float(args.kernel_trunc_sigma),
             "sigma_floor": float(args.sigma_floor),
             "max_frames": int(args.max_frames),
+            "only_datasets": list(only) if only is not None else None,
             "domain_mode": "global_extreme_across_datasets",
             "domain": {
                 "xmin": float(xmin),
@@ -328,10 +400,20 @@ def main():
     save_mode = "compressed" if args.save_compressed else "uncompressed"
     print(f"Save mode: {save_mode}")
 
-    for ds in datasets:
+    for ds in datasets_to_process:
         data_dir = ds["data_dir"]
         files = ds["files"]
-        out_dir = out_root / data_dir.name
+
+        is_high = data_dir.name in highres
+        if is_high:
+            out_dir = highres_root / data_dir.name
+            x_grid, y_grid, z_grid, X, Y, Z = high_grid
+            nx, ny, nz = args.highres_nx, args.highres_ny, args.highres_nz
+        else:
+            out_dir = out_root / data_dir.name
+            x_grid, y_grid, z_grid, X, Y, Z = low_grid
+            nx, ny, nz = args.nx, args.ny, args.nz
+
         out_dir.mkdir(parents=True, exist_ok=True)
 
         print(f"Processing {len(files)} frames from {data_dir} -> {out_dir}")
@@ -339,6 +421,11 @@ def main():
             "data_dir": str(data_dir),
             "out_dir": str(out_dir),
             "n_frames": int(len(files)),
+            "grid": {
+                "nx": int(nx),
+                "ny": int(ny),
+                "nz": int(nz),
+            },
             "frames": [],
         }
 
