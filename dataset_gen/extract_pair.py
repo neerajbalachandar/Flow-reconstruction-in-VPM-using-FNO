@@ -5,23 +5,23 @@ import h5py
 from scipy.spatial import cKDTree
 
 # ---------------- paths & config ----------------
-pfield_folder = "/media/dysco/New Volume/Neeraj/neuralop/data/raw data/5/input/"
-fdom_folder   = "/media/dysco/New Volume/Neeraj/neuralop/data/raw data/5/output/"
+pfield_folder = "/media/dysco/New Volume/Neeraj/neuralop/data/raw data/7/input/"
+fdom_folder   = "/media/dysco/New Volume/Neeraj/neuralop/data/raw data/7/output/"
 
-pfield_basename = "tethered-wing_pfield"
-fdom_basename   = "tethered-wing_fdom"   
+pfield_basename = "wing-example_pfield"
+fdom_basename   = "wing-example_fdom"   
 
-OUT_FOLDER = "/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_5_gno/"
+OUT_FOLDER = "/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_7_gno/"
 
 # Particle field (input) frame range/cadence
 PFRAME_START = 0
-PFRAME_STOP  = 360
+PFRAME_STOP  = 199
 PFRAME_STEP  = 1
 
 # Fluid domain (output) frame range/cadence
 FFRAME_START = 0
-FFRAME_STOP  = 358
-FFRAME_STEP  = 2
+FFRAME_STOP  = 199
+FFRAME_STEP  = 1
 
 # Pairing mode:
 # - "intersection": keep only frame ids present in both (same-time pairing)
