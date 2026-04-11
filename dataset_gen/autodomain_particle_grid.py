@@ -30,13 +30,13 @@ def parse_args():
     parser.add_argument(
         "--data-dir",
         type=Path,
-        default=Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_7_gno"),
+        default=Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_9_gno"),
         help="Folder containing frame_*.npz 3D particle files.",
     )
     parser.add_argument(
         "--out-dir",
         type=Path,
-        default=Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_7_fno_32"),
+        default=Path("/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_9_fno_32"),
         help="Output folder for frame_*_grid.npz files.",
     )
     parser.add_argument("--nx", type=int, default=32, help="Grid resolution in x.")

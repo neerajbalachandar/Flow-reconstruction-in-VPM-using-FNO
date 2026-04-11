@@ -5,13 +5,13 @@ import h5py
 from scipy.spatial import cKDTree
 
 # ---------------- paths & config ----------------
-pfield_folder = "/media/dysco/New Volume/Neeraj/neuralop/data/raw data/7/input/"
-fdom_folder   = "/media/dysco/New Volume/Neeraj/neuralop/data/raw data/7/output/"
+pfield_folder = "/media/dysco/New Volume/Neeraj/neuralop/data/raw data/9/input/"
+fdom_folder   = "/media/dysco/New Volume/Neeraj/neuralop/data/raw data/9/output/"
 
 pfield_basename = "wing-example_pfield"
 fdom_basename   = "wing-example_fdom"   
 
-OUT_FOLDER = "/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_7_gno/"
+OUT_FOLDER = "/media/dysco/New Volume/Neeraj/neuralop/data/train/pair_9_gno/"
 
 # Particle field (input) frame range/cadence
 PFRAME_START = 0
