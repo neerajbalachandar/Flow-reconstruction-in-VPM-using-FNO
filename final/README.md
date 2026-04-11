@@ -12,7 +12,7 @@ This folder is a **new version** of the preprocessing/training pipeline. Existin
 - `normalization.py` - train-split dataset-level channel normalization stats
 - `dataset_builder.py` - builds presets A-F + particle-surrogate dataset
 - `train.py` - field FNO training + particle true GNOBlock model
-- `h5_vtk_to_npz.py` - merges H5 solver arrays + VTK frame references into unified NPZ
+- `h5_vtk_to_npz.py` - merges split input/output H5 streams (+ optional XMF/VTK) into unified NPZ
 
 ## Key support implemented
 
@@ -59,6 +59,9 @@ python -m final.dataset_builder --config final/configs/pipeline_config.yaml --bu
 ```bash
 python -m final.h5_vtk_to_npz --config final/configs/h5_vtk_to_npz_template.yaml
 ```
+
+Use separate fields per dataset in YAML: `input_h5_glob`, `output_h5_glob`, `input_xmf_glob`, `output_xmf_glob`, `vtk_glob`.
+
 
 ## Train field model (FNO)
 
