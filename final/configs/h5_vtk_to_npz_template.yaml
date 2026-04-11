@@ -1,0 +1,27 @@
+# Template config to merge solver H5 arrays + matching VTK file paths into frame NPZ files.
+# Run:
+#   python -m final.h5_vtk_to_npz --config final/configs/h5_vtk_to_npz_template.yaml
+
+io:
+  # Example after you provide paths:
+  # h5_glob: ["/absolute/or/relative/path/to/h5/*.h5"]
+  # vtk_glob: ["/absolute/or/relative/path/to/vtk/*.vtk"]
+  h5_glob: []
+  vtk_glob: []
+
+output_dir: final/output/merged_npz
+
+# Map NPZ output keys -> H5 dataset internal paths.
+# Fill these with your real H5 structure when shared.
+# Example:
+# key_map:
+#   particle_xyz: "/particles/xyz"
+#   Gamma_vec: "/particles/Gamma"
+#   sigma: "/particles/sigma"
+#   vol: "/particles/vol"
+#   density: "/particles/density"
+#   static: "/particles/static"
+#   U: "/field/U"
+#   W: "/field/W"
+#   points: "/field/points"
+key_map: {}

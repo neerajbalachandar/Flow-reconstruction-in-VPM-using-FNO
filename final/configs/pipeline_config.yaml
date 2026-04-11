@@ -1,0 +1,112 @@
+# Geometry-aware unified preprocessing config
+# Build command:
+#   python -m final.dataset_builder --config final/configs/pipeline_config.yaml --build-field --build-particle
+
+dataset_name: unified_vpm_geometry_v1
+output_root: final/output
+
+# Optional default values used when case metadata does not override them
+default_dt: 0.0
+default_freestream: null
+include_coordinates: false
+
+# Cases can mix stationary-airfoil and flapping/moving configurations
+# Add/edit globs to your actual raw frame files and matching VTK geometry files.
+cases:
+  # Leave paths blank for now; fill these when you share final data locations.
+  - name: case_stationary_template
+    npz_glob: []
+    vtk_glob: []
+    stationary: true
+    angle_of_attack: 0.0
+    Reynolds_number: 0.0
+    reduced_frequency: 0.0
+    freestream: null
+
+  - name: case_flapping_template
+    npz_glob: []
+    vtk_glob: []
+    moving: true
+    flapping: true
+    angle_of_attack: 0.0
+    Reynolds_number: 0.0
+    reduced_frequency: 0.0
+    freestream: null
+    time_step: 0.0
+
+split:
+  train: 0.70
+  val: 0.15
+  test: 0.15
+  strategy: random
+  seed: 42
+
+grid:
+  # bounds_mode: global -> auto-compute min/max over all frames (particles + optional vtk points)
+  bounds_mode: global
+  bounds: null
+  padding_frac: 0.05
+  include_vtk_bounds: true
+  resolution: [32, 32, 32]
+
+# Dataset variants to auto-generate
+# A: scalar gamma baseline
+# B: Gamma vector + sigma + density
+# C: B + body_mask + SDF
+# D: C + coordinates X,Y,Z
+# E: D + phase + AoA + surface velocity
+# F: all available channels
+dataset_presets: ["A", "B", "C", "D", "E", "F"]
+
+# Optional custom channel mode (used only if dataset_presets includes CUSTOM)
+custom_input_channels:
+  - Gamma_x
+  - Gamma_y
+  - Gamma_z
+  - sigma
+  - density
+  - body_mask
+  - signed_distance_field
+
+# U / W / UW output target choice
+output_mode: UW
+
+projection:
+  kernel: gaussian         # gaussian | compact
+  radius: 0.05
+  support_multiplier: 3.0
+  radius_from_sigma: true
+  sigma_scale: 1.0
+  normalize_weights: true
+  min_weight: 1.0e-12
+
+geometry:
+  body_mask_thickness: 0.02
+  use_signed_sdf: true
+  include_coordinates: false
+
+interpolation:
+  method_priority: ["direct", "trilinear", "griddata", "rbf"]
+
+normalization:
+  enabled: true
+  write_normalized_samples: true
+
+# Particle-surrogate dataset settings
+build_particle_dataset: true
+particle_input_features:
+  - x
+  - y
+  - z
+  - Gamma_x
+  - Gamma_y
+  - Gamma_z
+  - sigma
+  - vol
+  - circulation
+  - static
+  - angle_of_attack
+  - phase
+  - freestream_x
+  - freestream_y
+  - freestream_z
