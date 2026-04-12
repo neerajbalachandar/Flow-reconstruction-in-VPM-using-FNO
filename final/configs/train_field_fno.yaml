@@ -1,12 +1,13 @@
-# Train FNO on one processed preset.
+# Train FNO on one generated preset folder (copied to GPU PC or local).
 # Run:
 #   python -m final.train --task field --config final/configs/train_field_fno.yaml
 
 seed: 42
+device: cuda   # cuda | cpu | auto
 
-# Set this to one generated preset folder (for example preset_E)
-preset_root: final/output/unified_vpm_geometry_v1/preset_E
-output_dir: final/output/unified_vpm_geometry_v1/preset_E/training_field
+# Set to one generated preset folder, e.g. preset_E
+preset_root: final/output/unified_vpm_geometry_v2/preset_E
+output_dir: final/output/unified_vpm_geometry_v2/preset_E/training_field
 
 use_normalized: true
 batch_size: 2

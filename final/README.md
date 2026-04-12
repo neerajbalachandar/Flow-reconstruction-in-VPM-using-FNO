@@ -48,37 +48,36 @@ From sample file `p_p_flapping_Wing_L_vlm.1478.vtk`, detected cell arrays includ
 
 These aliases are implemented in `final/geometry_features.py`.
 
-## Build datasets
+## Two-Stage Workflow (Preprocess and Train Separated)
 
-```bash
-python -m final.dataset_builder --config final/configs/pipeline_config.yaml --build-field --build-particle
-```
-
-## Merge H5 + VTK to NPZ (Template)
+1. Convert raw H5/XMF/VTK to merged NPZ frames (CPU/preprocess machine):
 
 ```bash
 python -m final.h5_vtk_to_npz --config final/configs/h5_vtk_to_npz_template.yaml
 ```
 
-Use separate fields per dataset in YAML: `input_h5_glob`, `output_h5_glob`, `input_xmf_glob`, `output_xmf_glob`, `vtk_glob`.
+2. Build train-ready datasets from merged NPZ (still preprocess machine):
 
+```bash
+python -m final.dataset_builder --config final/configs/pipeline_config.yaml --build-field --build-particle
+```
 
-## Train field model (FNO)
+3. Transfer generated dataset folders (for example `final/output/unified_vpm_geometry_v2`) to GPU machine via USB.
+
+4. Train on GPU machine (CUDA enabled via `device: cuda` in train config):
 
 ```bash
 python -m final.train --task field --config final/configs/train_field_fno.yaml
-```
-
-## Train particle model (true GNOBlock)
-
-```bash
 python -m final.train --task particle --config final/configs/train_particle_gno.yaml
 ```
 
+Use separate dataset fields in `h5_vtk_to_npz_template.yaml`:
+`input_h5_glob`, `output_h5_glob`, `input_xmf_glob`, `output_xmf_glob`, `vtk_glob`.
+
 ## Notes
 
-- `final/configs/pipeline_config.yaml` intentionally leaves case paths blank for now.
-- Fill `npz_glob` and `vtk_glob` when your final paths are ready.
+- `final/configs/pipeline_config.yaml` is stage-2 and consumes NPZs from `h5_vtk_to_npz.py`.
+- Cases are fully generic (e.g. `1`, `2`, `7`, `8`); no flapping/stationary classification is required.
 - VTK loading uses `pyvista` when available, then falls back to `vtk`.
 - Interpolation methods requiring SciPy will gracefully fall back if unavailable.
 - Optimizer selection is `auto` by default and chooses Adam/AdamW from NeuralOperator when available.

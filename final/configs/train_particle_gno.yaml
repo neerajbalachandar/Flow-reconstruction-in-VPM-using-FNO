@@ -1,13 +1,14 @@
-# Train particle model with a true NeuralOperator GNOBlock stack.
+# Train particle model with true NeuralOperator GNOBlock stack.
 # Run:
 #   python -m final.train --task particle --config final/configs/train_particle_gno.yaml
 
 seed: 42
+device: cuda   # cuda | cpu | auto
 
-dataset_npz: final/output/unified_vpm_geometry_v1/particle_dataset/particle_dataset.npz
-split_idx_npz: final/output/unified_vpm_geometry_v1/particle_dataset/particle_split_indices.npz
+dataset_npz: final/output/unified_vpm_geometry_v2/particle_dataset/particle_dataset.npz
+split_idx_npz: final/output/unified_vpm_geometry_v2/particle_dataset/particle_split_indices.npz
 
-output_dir: final/output/unified_vpm_geometry_v1/particle_dataset/training_particle_gno
+output_dir: final/output/unified_vpm_geometry_v2/particle_dataset/training_particle_gno
 
 epochs: 200
 log_every: 10

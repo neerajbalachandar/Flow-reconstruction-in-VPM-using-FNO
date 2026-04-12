@@ -18,11 +18,11 @@ pair_mode: intersection
 input_key_map: {}
 output_key_map: {}
 
-# Multiple datasets supported.
-# Keep paths blank now; fill later.
+# Multiple datasets supported. Use numeric names if preferred.
+# Set output_subdir to 1/2/7/8 etc so pipeline_config npz_glob can point there.
 datasets:
-  - name: dataset_1
-    output_subdir: dataset_1
+  - name: "1"
+    output_subdir: "1"
 
     # Required (separate input/output streams)
     input_h5_glob: []
@@ -33,18 +33,34 @@ datasets:
     output_xmf_glob: []
     vtk_glob: []
 
-    # Optional per-dataset override
     pair_mode: intersection
-
-    # NPZ key name -> H5 internal dataset path
-    # Put only INPUT-stream datasets here
     input_key_map: {}
-
-    # Put only OUTPUT-stream datasets here
     output_key_map: {}
 
-  - name: dataset_2
-    output_subdir: dataset_2
+  - name: "2"
+    output_subdir: "2"
+    input_h5_glob: []
+    output_h5_glob: []
+    input_xmf_glob: []
+    output_xmf_glob: []
+    vtk_glob: []
+    pair_mode: intersection
+    input_key_map: {}
+    output_key_map: {}
+
+  - name: "7"
+    output_subdir: "7"
+    input_h5_glob: []
+    output_h5_glob: []
+    input_xmf_glob: []
+    output_xmf_glob: []
+    vtk_glob: []
+    pair_mode: intersection
+    input_key_map: {}
+    output_key_map: {}
+
+  - name: "8"
+    output_subdir: "8"
     input_h5_glob: []
     output_h5_glob: []
     input_xmf_glob: []

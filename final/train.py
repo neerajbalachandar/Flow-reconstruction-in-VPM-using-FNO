@@ -23,6 +23,30 @@ def set_seed(seed: int = 42) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
+def resolve_device(cfg: Dict[str, Any]) -> torch.device:
+    requested = str(cfg.get("device", "auto")).lower()
+
+    if requested == "cuda":
+        if not torch.cuda.is_available():
+            raise RuntimeError("CUDA requested in config (`device: cuda`) but no CUDA device is available.")
+        device = torch.device("cuda")
+    elif requested == "cpu":
+        device = torch.device("cpu")
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if device.type == "cuda":
+        try:
+            gpu_name = torch.cuda.get_device_name(torch.cuda.current_device())
+        except Exception:
+            gpu_name = "unknown-gpu"
+        print(f"[device] {device} ({gpu_name})")
+    else:
+        print("[device] cpu")
+
+    return device
+
+
 def make_adam_optimizer(params, cfg: Dict[str, Any]):
     """Use NeuralOperator Adam/AdamW when available, else torch fallback."""
     opt_name = str(cfg.get("optimizer", "auto")).lower()
@@ -150,7 +174,7 @@ def _eval_field(model: nn.Module, loader: DataLoader, device: torch.device) -> D
 
 def train_field_model(cfg: Dict[str, Any]) -> Dict[str, Any]:
     set_seed(int(cfg.get("seed", 42)))
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = resolve_device(cfg)
 
     preset_root = Path(cfg["preset_root"])
     train_ds = GridSampleDataset(preset_root, "train", use_normalized=bool(cfg.get("use_normalized", True)))
@@ -397,7 +421,7 @@ def _eval_particle(model, loader, device, max_nodes: int = 4096):
 
 def train_particle_model(cfg: Dict[str, Any]) -> Dict[str, Any]:
     set_seed(int(cfg.get("seed", 42)))
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = resolve_device(cfg)
 
     dataset_npz = Path(cfg["dataset_npz"])
     split_idx_npz = Path(cfg["split_idx_npz"])

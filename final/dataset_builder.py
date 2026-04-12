@@ -390,16 +390,24 @@ def _resolve_preset_channels(
 
 
 def _entry_context(entry: FrameEntry, case_idx: int, n_case_entries: int, global_cfg: Mapping[str, Any]) -> Dict[str, Any]:
-    phase = 0.0
-    if bool(entry.meta.get("flapping", False)) or bool(entry.meta.get("moving", False)):
-        if n_case_entries > 1:
+    # General phase logic (no mandatory case-type labeling).
+    # - If `phase` is provided in metadata, use it.
+    # - Else, optionally infer normalized phase from frame index.
+    # - For explicitly stationary-labeled cases, keep phase=0.
+    if "phase" in entry.meta:
+        phase = float(entry.meta.get("phase", 0.0))
+    else:
+        auto_phase = bool(entry.meta.get("auto_phase_from_index", global_cfg.get("auto_phase_from_index", True)))
+        if auto_phase and n_case_entries > 1:
             phase = float(case_idx) / float(max(1, n_case_entries - 1))
+        else:
+            phase = 0.0
 
     if bool(entry.meta.get("stationary", False)):
         phase = 0.0
 
     context = {
-        "phase": entry.meta.get("phase", phase),
+        "phase": phase,
         "angle_of_attack": entry.meta.get("angle_of_attack", entry.meta.get("aoa", 0.0)),
         "Reynolds_number": entry.meta.get("Reynolds_number", entry.meta.get("Re", 0.0)),
         "reduced_frequency": entry.meta.get("reduced_frequency", entry.meta.get("k", 0.0)),
@@ -408,9 +416,6 @@ def _entry_context(entry: FrameEntry, case_idx: int, n_case_entries: int, global
         "include_coordinates": bool(global_cfg.get("include_coordinates", False)),
         "stationary": bool(entry.meta.get("stationary", False)),
     }
-
-    if bool(entry.meta.get("stationary", False)):
-        context["phase"] = 0.0
 
     return context
 
